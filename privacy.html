@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — shorts-pipeline</title>
+  <meta name="description" content="Privacy policy for shorts-pipeline, a personal short-form video automation tool using TikTok Login Kit and the Content Posting API.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <style>
+    :root {
+      --bg: #0b0d12; --card: #161a24; --border: #232936;
+      --text: #e8ebf2; --muted: #9aa3b5; --accent: #25f4ee;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+    nav {
+      position: sticky; top: 0; background: rgba(11,13,18,.85); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { font-weight: 700; font-size: 17px; color: var(--text); text-decoration: none; }
+    .brand span { color: var(--accent); }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 22px; }
+    .nav-links a:hover { color: var(--text); }
+    main { padding: 64px 0 80px; }
+    h1 { font-size: 34px; letter-spacing: -.5px; margin-bottom: 8px; }
+    .updated { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+    h2 { font-size: 20px; margin: 36px 0 12px; }
+    p, li { color: var(--muted); font-size: 15.5px; }
+    ul { padding-left: 22px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: var(--text); }
+    code {
+      background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+      padding: 1px 7px; font-size: 13.5px; color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    footer { border-top: 1px solid var(--border); padding: 32px 0 48px; }
+    footer a { color: var(--muted); font-size: 14px; margin-right: 22px; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="./">shorts<span>-pipeline</span></a>
+      <div class="nav-links">
+        <a href="./">Home</a>
+        <a href="./terms">Terms</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: June 2026</p>
+
+    <p>This privacy policy describes how shorts-pipeline ("the app") handles data when used with TikTok's Login Kit and Content Posting API.</p>
+
+    <h2>1. Scope</h2>
+    <p>The app is operated by a single developer for personal use to upload videos to the developer's own TikTok account. It is not offered to third-party users.</p>
+
+    <h2>2. Data Accessed Through TikTok</h2>
+    <p>When the developer authorizes the app via TikTok Login Kit, the app receives:</p>
+    <ul>
+      <li>TikTok username and open ID</li>
+      <li>Basic profile information (display name, avatar URL)</li>
+      <li>An OAuth access token and refresh token scoped to <code>user.info.basic</code> and <code>video.upload</code> / <code>video.publish</code></li>
+    </ul>
+    <p>The app does <strong>not</strong> access TikTok messages, contacts, followers, watch history, or any data belonging to other TikTok users.</p>
+
+    <h2>3. How Data Is Used</h2>
+    <ul>
+      <li>The access token is used solely to upload videos to the developer's own TikTok account via the Content Posting API.</li>
+      <li>Username and open ID are used only to confirm which account is authenticated.</li>
+    </ul>
+
+    <h2>4. Storage and Retention</h2>
+    <ul>
+      <li>Access tokens and refresh tokens are stored locally on the developer's machine in an environment file (<code>.env</code>) that is not committed to source control.</li>
+      <li>No data is transmitted to any third-party server operated by the developer.</li>
+      <li>Tokens are retained until the developer revokes access or they expire per TikTok's policy.</li>
+    </ul>
+
+    <h2>5. Sharing</h2>
+    <p>The app does not sell, share, or transmit any TikTok data to any third party. All communication is directly between the app and TikTok's official API endpoints.</p>
+
+    <h2>6. Deletion and Revocation</h2>
+    <p>The developer may revoke the app's access at any time via <a href="https://www.tiktok.com/setting/privacy-and-safety">TikTok account settings</a>. Upon revocation, stored tokens become invalid and are deleted from the local <code>.env</code> file.</p>
+
+    <h2>7. TikTok Developer Terms</h2>
+    <p>Use of the app is subject to <a href="https://developers.tiktok.com/legal/">TikTok's Developer Terms of Service</a>.</p>
+
+    <h2>8. Contact</h2>
+    <p><a href="mailto:mc500.business@gmail.com">mc500.business@gmail.com</a></p>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a href="./">Home</a>
+      <a href="./terms">Terms of Service</a>
+      <a href="mailto:mc500.business@gmail.com">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
