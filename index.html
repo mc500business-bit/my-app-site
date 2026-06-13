@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shorts-pipeline — Automated short-form video creation &amp; publishing</title>
+  <meta name="description" content="shorts-pipeline is a personal automation tool that generates short-form videos end-to-end — script, voiceover, captions, music — and publishes them to the developer's own TikTok account via the official Content Posting API.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --bg-soft: #12151d;
+      --card: #161a24;
+      --border: #232936;
+      --text: #e8ebf2;
+      --muted: #9aa3b5;
+      --accent: #25f4ee;
+      --accent2: #fe2c55;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(11,13,18,.85); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { font-weight: 700; font-size: 17px; letter-spacing: -.2px; color: var(--text); text-decoration: none; }
+    .brand span { color: var(--accent); }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 22px;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    header.hero { padding: 88px 0 64px; }
+    .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: center; }
+    .badge {
+      display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .4px;
+      color: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+      padding: 4px 12px; margin-bottom: 18px; text-transform: uppercase;
+    }
+    h1 { font-size: 44px; line-height: 1.15; letter-spacing: -1px; margin-bottom: 18px; }
+    h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lede { color: var(--muted); font-size: 18px; max-width: 540px; }
+    .hero-cta { margin-top: 28px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; padding: 11px 22px; border-radius: 10px; font-size: 15px;
+      font-weight: 600; text-decoration: none; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: linear-gradient(90deg, var(--accent), #4de0db); color: #04282b; }
+    .btn-ghost { border: 1px solid var(--border); color: var(--text); }
+
+    /* Phone mockup */
+    .phone {
+      width: 230px; height: 470px; margin: 0 auto;
+      border: 3px solid var(--border); border-radius: 36px;
+      background: linear-gradient(160deg, #1c2230, #10131b);
+      position: relative; overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    }
+    .phone .notch {
+      width: 90px; height: 20px; background: var(--bg); border-radius: 0 0 14px 14px;
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    }
+    .phone .vid {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 70% 20%, rgba(37,244,238,.18), transparent 55%),
+        radial-gradient(circle at 25% 75%, rgba(254,44,85,.18), transparent 55%);
+    }
+    .phone .caption {
+      position: absolute; left: 16px; right: 16px; bottom: 96px;
+      font-size: 15px; font-weight: 800; text-align: center; line-height: 1.3;
+      text-shadow: 0 2px 8px rgba(0,0,0,.8);
+    }
+    .phone .bar {
+      position: absolute; left: 16px; right: 16px; bottom: 60px; height: 4px;
+      background: var(--border); border-radius: 4px;
+    }
+    .phone .bar i { display: block; width: 62%; height: 100%; background: var(--accent); border-radius: 4px; }
+    .phone .meta {
+      position: absolute; left: 16px; bottom: 26px; font-size: 11px; color: var(--muted);
+    }
+
+    /* Sections */
+    section { padding: 64px 0; border-top: 1px solid var(--border); }
+    .kicker { color: var(--accent); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    h2 { font-size: 30px; letter-spacing: -.5px; margin-bottom: 14px; }
+    .section-lede { color: var(--muted); max-width: 640px; margin-bottom: 36px; }
+
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card .ico { font-size: 26px; margin-bottom: 12px; display: block; }
+    .card h3 { font-size: 17px; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 14.5px; }
+
+    /* Pipeline steps */
+    .steps { counter-reset: step; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+    .step {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 16px; position: relative;
+    }
+    .step::before {
+      counter-increment: step; content: counter(step);
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); color: #04282b; font-weight: 800; font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .step h3 { font-size: 14.5px; margin-bottom: 6px; }
+    .step p { color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+
+    /* Scope table */
+    table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+    th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .6px; }
+    td code {
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 6px;
+      padding: 1px 7px; font-size: 13px; color: var(--accent); white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    td.muted { color: var(--muted); }
+    .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+    /* FAQ */
+    details {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 22px; margin-bottom: 12px;
+    }
+    summary { cursor: pointer; font-weight: 600; font-size: 15.5px; }
+    details p { color: var(--muted); font-size: 14.5px; margin-top: 10px; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 40px 0 56px; }
+    .foot-grid { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    footer a { color: var(--muted); text-decoration: none; font-size: 14px; }
+    footer a:hover { color: var(--text); }
+    .foot-links a { margin-right: 22px; }
+    .copyright { color: #5d6678; font-size: 13px; margin-top: 18px; }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .phone { display: none; }
+      h1 { font-size: 34px; }
+      .grid3, .steps { grid-template-columns: 1fr; }
+      .nav-links a { margin-left: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="./">shorts<span>-pipeline</span></a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#tiktok-api">TikTok API</a>
+        <a href="#faq">FAQ</a>
+        <a href="./privacy">Privacy</a>
+        <a href="./terms">Terms</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="badge">Personal automation tool</span>
+        <h1>Short-form video, <em>fully automated</em> — from idea to upload.</h1>
+        <p class="lede">
+          shorts-pipeline is a single-developer automation tool that creates complete
+          short-form videos — script, voiceover, synced captions, and licensed background
+          music — then publishes them to the developer's own TikTok account through TikTok's
+          official Content Posting API.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#how-it-works">See how it works</a>
+          <a class="btn btn-ghost" href="#tiktok-api">TikTok API usage</a>
+        </div>
+      </div>
+      <div class="phone" aria-hidden="true">
+        <div class="vid"></div>
+        <div class="notch"></div>
+        <div class="caption">DID YOU KNOW<br>THIS WAS MADE<br>BY A PIPELINE? 🤯</div>
+        <div class="bar"><i></i></div>
+        <div class="meta">♪ licensed track · auto-captioned</div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features">
+    <div class="wrap">
+      <p class="kicker">Features</p>
+      <h2>Everything a short needs, generated in one run</h2>
+      <p class="section-lede">
+        Each pipeline run produces a finished, ready-to-post vertical video. No manual editing,
+        no copy-pasting between tools.
+      </p>
+      <div class="grid3">
+        <div class="card">
+          <span class="ico">✍️</span>
+          <h3>Script generation</h3>
+          <p>Hook-first scripts written automatically around a rotating pool of trending topics, tuned over time using real performance analytics.</p>
+        </div>
+        <div class="card">
+          <span class="ico">🗣️</span>
+          <h3>Voiceover</h3>
+          <p>Narration rendered locally, timed precisely to the script with sound effects at the right beats.</p>
+        </div>
+        <div class="card">
+          <span class="ico">💬</span>
+          <h3>Word-synced captions</h3>
+          <p>Bold animated captions synchronized word-by-word with the voiceover, styled for mobile readability with emoji support.</p>
+        </div>
+        <div class="card">
+          <span class="ico">🎵</span>
+          <h3>Licensed music</h3>
+          <p>Background tracks pulled only from properly licensed libraries and mixed under the narration at the correct loudness.</p>
+        </div>
+        <div class="card">
+          <span class="ico">📈</span>
+          <h3>Analytics feedback loop</h3>
+          <p>View and retention data from published videos feeds back into topic and hook selection, so output quality improves with every run.</p>
+        </div>
+        <div class="card">
+          <span class="ico">🚀</span>
+          <h3>One-step publishing</h3>
+          <p>Finished videos are uploaded to the developer's own accounts automatically — including TikTok via the official Content Posting API.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="wrap">
+      <p class="kicker">How it works</p>
+      <h2>The pipeline, end to end</h2>
+      <p class="section-lede">
+        One command runs the whole chain locally on the developer's machine. Nothing is
+        outsourced to third-party servers.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <h3>Pick a topic</h3>
+          <p>A topic is selected from a curated, analytics-ranked pool.</p>
+        </div>
+        <div class="step">
+          <h3>Write the script</h3>
+          <p>A short, hook-driven script is generated for the topic.</p>
+        </div>
+        <div class="step">
+          <h3>Render audio</h3>
+          <p>Narration is rendered and mixed with licensed music.</p>
+        </div>
+        <div class="step">
+          <h3>Compose video</h3>
+          <p>Visuals and word-synced captions are composited into a vertical video.</p>
+        </div>
+        <div class="step">
+          <h3>Publish</h3>
+          <p>The finished video is uploaded to the developer's own TikTok account.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tiktok-api">
+    <div class="wrap">
+      <p class="kicker">TikTok integration</p>
+      <h2>How shorts-pipeline uses the TikTok API</h2>
+      <p class="section-lede">
+        shorts-pipeline integrates with <strong>Login Kit</strong> and the
+        <strong>Content Posting API</strong>. It is a single-user tool: the only account it
+        ever authenticates or posts to is the developer's own. It never accesses other users'
+        data, never reads messages or followers, and never transmits TikTok data to any
+        third-party server.
+      </p>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr><th>Scope</th><th>What it's used for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>user.info.basic</code></td>
+              <td class="muted">Reads the authenticated account's display name, avatar, and open ID — used only to confirm the pipeline is connected to the correct (developer-owned) account before posting.</td>
+            </tr>
+            <tr>
+              <td><code>video.upload</code></td>
+              <td class="muted">Uploads the locally rendered video file to the developer's TikTok account as a draft via the Content Posting API.</td>
+            </tr>
+            <tr>
+              <td><code>video.publish</code></td>
+              <td class="muted">Publishes the uploaded video directly to the developer's own TikTok profile with its generated title and hashtags.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="section-lede" style="margin-top: 28px; margin-bottom: 0;">
+        OAuth tokens are stored only in a local environment file on the developer's machine and
+        can be revoked at any time from TikTok's account settings. Full details are in the
+        <a href="./privacy" style="color: var(--accent);">Privacy Policy</a>.
+      </p>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <p class="kicker">FAQ</p>
+      <h2>Common questions</h2>
+      <div style="margin-top: 28px;">
+        <details>
+          <summary>Who can use shorts-pipeline?</summary>
+          <p>Only the developer. shorts-pipeline is not a public service, has no sign-up, and posts exclusively to accounts owned by the developer. It exists to automate the developer's own content workflow.</p>
+        </details>
+        <details>
+          <summary>What data does it collect from TikTok?</summary>
+          <p>Only the authenticated developer account's basic profile info (display name, avatar, open ID) and the OAuth tokens needed to upload. No data about any other TikTok user is ever accessed, stored, or shared. See the <a href="./privacy" style="color: var(--accent);">Privacy Policy</a>.</p>
+        </details>
+        <details>
+          <summary>Is the content compliant with TikTok's guidelines?</summary>
+          <p>Yes. All published content is reviewed against TikTok's Community Guidelines, uses only licensed music, and is generated by the developer's own pipeline — see the <a href="./terms" style="color: var(--accent);">Terms of Service</a>.</p>
+        </details>
+        <details>
+          <summary>Is shorts-pipeline affiliated with TikTok?</summary>
+          <p>No. shorts-pipeline is an independent tool and is not affiliated with, endorsed by, or sponsored by TikTok Ltd. or ByteDance Ltd.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <a class="brand" href="./">shorts<span>-pipeline</span></a>
+        </div>
+        <div class="foot-links">
+          <a href="./privacy">Privacy Policy</a>
+          <a href="./terms">Terms of Service</a>
+          <a href="mailto:mc500.business@gmail.com">mc500.business@gmail.com</a>
+        </div>
+      </div>
+      <p class="copyright">© 2026 shorts-pipeline. Not affiliated with TikTok Ltd. or ByteDance Ltd.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
